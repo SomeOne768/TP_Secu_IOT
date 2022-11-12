@@ -1,11 +1,12 @@
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import dh
 from cryptography.hazmat.primitives import serialization
 import paho.mqtt.client as mqtt
 import time
+
 
 
 # Generate a private key for use in the exchange.
@@ -21,14 +22,15 @@ IOT_public_key = IOT_private_key.public_key()
 IOT_public_bytes = IOT_public_key.public_bytes(encoding=serialization.Encoding.Raw, format=serialization.PublicFormat.Raw)
 
 
-TOPIC_IOP_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyIoT"
+TOPIC_IOT_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyIoT"
 TOPIC_Serveur_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyServer"
 
 
 BROKER_IP = "localhost"
-PORT = 1884
+PORT = 3000 # 1884
 USER = "username"
 PASSWORD = "password"
+Exchange_key_from_Serveur = b''
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code => "+mqtt.connack_string(rc))
@@ -38,7 +40,15 @@ def on_subscribe(client, userdata, mid, granted_qos):
 
 def on_message(client, userdata, msg):
     print("\nReceived message '" + str(msg.payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    # On affiche la clé publique:
+    if len(msg.payload) == 32:
+        # C'est bien la clé
+        print("Public key from Serveur: " + str(msg.payload))
+        Exchange_key_from_Serveur = msg.payload
 
+        shared_IOT = IOT_private_key.exchange( X25519PublicKey.from_public_bytes(Exchange_key_from_Serveur) )
+        print("\n\nLa clé d'echange calculée est:" + str(shared_IOT))
+    
 def on_publish(client, userdata, mid):
     print("--on_publish callback --mid: " + str(mid) )
 
@@ -46,22 +56,31 @@ client = mqtt.Client(client_id="IOT04")
 client.on_subscribe = on_subscribe
 client.on_message = on_message
 client.on_publish = on_publish
-
 client.on_connect = on_connect
 
+# Message retenu => on ne publie qu'une seule fois et on s'abonne pour récupérer la clé q'une suele fois sans spam
+# Pour être spur qu'il est correcte on augmente donc la qualité de service
 try:
     # client.username_pw_set(username=USER, password=PASSWORD)
-    client.connect(BROKER_IP, PORT) # groupes 1 à 4
-    #client.connect("m21.cloudmqtt.com", 13197) # groupes 5 à 8
-    #client.connect("m21.cloudmqtt.com", 16511) # groupes 9 à 12
-    #client.connect("m21.cloudmqtt.com", 10318) # groupes 13 à 16
+    client.connect(BROKER_IP, PORT) # groupes 1 Ã  4
+    #client.connect("m21.cloudmqtt.com", 13197) # groupes 5 Ã  8
+    #client.connect("m21.cloudmqtt.com", 16511) # groupes 9 Ã  12
+    #client.connect("m21.cloudmqtt.com", 10318) # groupes 13 Ã  16
+    
     try:
-        client.subscribe(TOPIC_Serveur_public_key, qos=0)
+        # On envoie notre clé sur le broker
+        (rc, mid) = client.publish(topic=TOPIC_IOT_public_key, payload=IOT_public_bytes, qos=1, retain=True)
+        print("Error return from publish of mid = " + str(mid) +" : " + mqtt.error_string(rc))
+        
+        #On s'abonne pour récupérer la clé du serveur
+        client.subscribe(TOPIC_Serveur_public_key, qos=1)
+        
         client.loop_start()
 
+        # On a pas besoin de spam le message car il est retenu
         while True:
-            (rc, mid) = client.publish(topic=TOPIC_IOP_public_key, payload=IOT_public_bytes, qos=0)
-            print("Error return from publish of mid = " + str(mid) +" : " + mqtt.error_string(rc))
+            # (rc, mid) = client.publish(topic=TOPIC_IOT_public_key, payload=IOT_public_bytes, qos=0)
+            # print("Error return from publish of mid = " + str(mid) +" : " + mqtt.error_string(rc))
             time.sleep(5)
 
     except KeyboardInterrupt:

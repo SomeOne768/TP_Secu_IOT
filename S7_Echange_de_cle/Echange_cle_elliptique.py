@@ -59,15 +59,15 @@ shared_Alice = Alice_private_key.exchange(Bob_public_key)
 shared_Bob = Bob_private_key.exchange(Alice_public_key)
 
 
-# print(Alice_private_key)
-# print(Alice_public_key)
+print(Alice_private_key)
+print(Alice_public_key)
 
 
-# print(Bob_private_key)
-# print(Bob_public_key)
+print(Bob_private_key)
+print(Bob_public_key)
 
-# print(shared_Alice)
-# print(shared_Bob)
+print(shared_Alice)
+print(shared_Bob)
 
-TOPIC_IOP_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyIoT"
-TOPIC_Server_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyServer"
+TOPIC_IOT_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyIoT"
+TOPIC_Serveur_public_key = "/ISIMA/S7_DH/GROUPE_4/PublicKeyServer"
