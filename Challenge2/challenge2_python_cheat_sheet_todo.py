@@ -1,28 +1,53 @@
 # -*- coding: utf-8 -*-
+import base64
+
+
+
 def EncodeXor(tabMessage,tabKey):
     """ Chiffrement Ou exclusif."""
     """ tabMessage contient le message sous forme de tableau d'octets"""
     """ tabKey contient la clef sous forme de tableau d'octets"""
     """ Retourne un tableau d'octets."""
+    i = 0
+    result = []
+    for octet in tabMessage:
+        result.append(octet^tabKey[i])
+        i = (i+1)%len(tabKey)
+    
+    return bytearray(result)
+
 
 def DecodeXor(tabMessage,tabKey):
     """ Chiffrement Ou exclusif."""
     """ tabMessage contient le message sous forme de tableau d'octets"""
     """ tabKey contient la clef sous forme de tableau d'octets"""
     """ Retourne un tableau d'octets."""
+    # C'est exactement la même chose
+    return EncodeXor(tabMessage, tabKey)
+
+
 
 def Indice(table,element):
     """ Retourne l'indice d'élément dans table"""
+    i = 0
+    for elt in table:
+        if elt == element:
+            break
+        i +=1
+
+    return i
 
 def EncodeBase64(tabMessage):
     """ Encode en base 64 le paramètre chaine"""
     """ tabMessage contient le message sous forme de tableau d'octets"""
     """ Retourne un tableau d'octets."""
+    return base64.standard_b64encode(tabMessage)
 
 def DecodeBase64(strMessage):
     """ Decode la chaine encodée en base 64"""
     """ strMessage doit être une chaine ASCII elle sera encodée en utf-8"""
     """ retourne un tableau d'octets"""
+    return base64.standard_b64decode(strMessage)
 
 def EncodeAES_ECB(strMessage,tabKey):
     """ Chiffrement AES-ECB 128 bits de strMessage avec tabKey comme clef.
