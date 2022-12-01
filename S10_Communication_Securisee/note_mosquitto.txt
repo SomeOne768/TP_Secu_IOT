@@ -1,0 +1,2 @@
+mosquitto_pub -p 9080 -h localhost -t "topic" -m "monM" -u "me"
+mosquitto_sub -p 9080 -h localhost -t "topic" -u "me2"
