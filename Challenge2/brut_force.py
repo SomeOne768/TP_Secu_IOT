@@ -267,4 +267,3 @@ if __name__ == '__main__':
     # print(keyPossible)
 
     dico_from_file()
-

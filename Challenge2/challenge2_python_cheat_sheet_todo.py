@@ -60,6 +60,8 @@ def EncodeAES_ECB(strMessage, tabKey):
     if len(strMessage) < 16:
         # Il faut completer avec des espaces
         strMessage += ' ' * (16 - len(strMessage))
+    elif len(strMessage) > 16:
+        return EncodeAES_ECB(strMessage[0:16], tabKey) + EncodeAES_ECB(strMessage[16:], tabKey)
 
     strMessage = strMessage.encode(encoding='UTF-8')
     cipher = Cipher(algorithms.AES(bytearray(tabKey)), modes.ECB())
