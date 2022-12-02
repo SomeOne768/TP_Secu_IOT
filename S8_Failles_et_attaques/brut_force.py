@@ -132,25 +132,92 @@ def brute_force_attack_XORv2(msg, keySize=4):
     return keyPossible
 
 
+def brut_force_AES(msg, keySize = 128):
+    # Taille de cle en octet : 
+    keySize = int(keySize/8)
+    allowed_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    # Au cas ou:
+    # allowed_char = [chr(i) for i in range(128)]
+    # 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~ 
+    possibilite = [allowed_char for i in range(keySize)]
+    iter_possibilite = iterateur_perso(possibilite)
+    keyPossible = []
+    
+    for key in iter_possibilite:
+        decode = perso.DecodeAES_ECB(msg, perso.toTab(key))
+        decode = perso.toStr(decode)
+
+        if dechiffrement_valid(decode, allowed_char):
+
+            if is_correct(decode, ["ON", "OFF"]):
+                keyPossible.append(key)
+    
+    return keyPossible
+
+def dico_from_file(filename="francais.txt"):
+    dico = []
+    with open(filename, "r") as f:
+        for line in f:
+            s = line.strip('\n')
+            dico.append(s)
+    
+    return dico
+
+
+def dico_from_file_iter(filename="francais.txt"):
+    with open(filename, "r") as f:
+        for line in f:
+            s = line.strip('\n')
+            yield s
+
+def dictionnaire_AES(msg, dico=[], filename="francais.txt"):
+    allowed_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    dico = dico_from_file_iter(filename)
+    keyPossible=[]
+
+    for key in dico:
+        decode = perso.DecodeAES_ECB(msg, perso.toTab(key))
+        decode = perso.toStr(decode)
+
+        if dechiffrement_valid(decode, allowed_char):
+
+            if is_correct(decode, ["ON", "OFF"]):
+                keyPossible.append(key)
+    
+    return keyPossible
+
+    
+
 
 if __name__ == '__main__':
     # Teston ça
-    allowed_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-    tabkey = "".join(random.choices(allowed_char, k=4))
-    print("key a trouver:")
-    print(tabkey)
-    XOR = utilitaire.gen_payloads(1)[0]
-    XOR = perso.EncodeXor(perso.toTab(XOR), perso.toTab(tabkey))
-    print("message a dechifferer")
-    print(perso.toStr(perso.DecodeXor(XOR, perso.toTab(tabkey))))
-    time.sleep(2)
-    temps_avant = time.time()
-    keys = brute_force_attack_XORv2(XOR, keySize=4)
-    temps_apres = time.time()
-    print(tabkey in keys)
-    time.sleep(2)
-    print(keys)
-    print(f"duree: {temps_apres-temps_avant}")
-    time.sleep(2)
-    for key in keys:
-        print(perso.DecodeXor(XOR, perso.toTab(key)))
+    # allowed_char = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    # tabkey = "".join(random.choices(allowed_char, k=4))
+    # print("key a trouver:")
+    # print(tabkey)
+    # XOR = utilitaire.gen_payloads(1)[0]
+    # XOR = perso.EncodeXor(perso.toTab(XOR), perso.toTab(tabkey))
+    # print("message a dechifferer")
+    # print(perso.toStr(perso.DecodeXor(XOR, perso.toTab(tabkey))))
+    # time.sleep(2)
+    # temps_avant = time.time()
+    # keys = brute_force_attack_XORv2(XOR, keySize=4)
+    # temps_apres = time.time()
+    # print(tabkey in keys)
+    # time.sleep(2)
+    # print(keys)
+    # print(f"duree: {temps_apres-temps_avant}")
+    # time.sleep(2)
+    # for key in keys:
+    #     print(perso.DecodeXor(XOR, perso.toTab(key)))
+
+    # AES:
+    # message = "ON a decoder"
+    # key = "0123456789123456"
+    # ct = perso.EncodeAES_ECB(message, perso.toTab(key))
+
+    # keyPossible = brut_force_AES(perso.toTab(message))
+    # print(keyPossible)
+
+    dico_from_file()
+
