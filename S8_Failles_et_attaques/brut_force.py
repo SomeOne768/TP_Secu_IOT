@@ -186,6 +186,41 @@ def dictionnaire_AES(msg, dico=[], filename="francais.txt"):
     
     return keyPossible
 
+
+def complementaire_inverser_ordre(key):
+    return key[::-1]
+
+def complementaire_inverser_min_maj(key):
+    s = ""
+    for c in key:
+        if c >= 'a' and c <= 'z':
+            c = 'A' + c - 'a'
+        elif c >= 'A' and c <= 'Z':
+            c = 'a' + c - 'a'
+        s += c 
+    
+    return s
+
+def complementaire_premiere_maj(key):
+    if key[0] >= 'a' and key[0] <= 'z':
+        key[0] = 'A' + key[0] - 'a'
+    
+    return key
+
+def complementaire_langage_hacker(key):
+    # A->4, E->3, O->0, T->7,
+    key = key.replace('A', '4')
+    key = key.replace('E', '3')
+    key = key.replace('O', '0')
+    key = key.replace('T', '4')
+
+    # key = key.replace('a', '4')
+    # key = key.replace('e', '3')
+    # key = key.replace('o', '0')
+    # key = key.replace('t', '4')
+
+    return key
+
     
 
 
