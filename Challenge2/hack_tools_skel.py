@@ -40,6 +40,9 @@ def on_message(client, userdata, msg):
         topic = topic.replace("LED1", "LED2")
         client.publish(topic, newpayload)
 
+allowed_char = "AEI"
+usefull_char = [allowed_char for i in range(3)]
+poss = iterateur_perso(usefull_char)
 
 def on_publish(client, userdata, mid):
     print("--on_publish callback --mid: " + str(mid))
